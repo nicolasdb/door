@@ -1,73 +1,114 @@
-# Open Door
-Open the door of the Commons Hub Brussels via a discord bot.
+# Commons Hub Door Control System
 
-Join the #door channel on discord.commonshub.brussels to open the door (you have to be a member).
-You can use the `/open` command or just say "open" in that channel.
+## Overview
+A community-centered solution for secure, remote door access using Discord, ESP32, and web technologies. Open the door of the Commons Hub Brussels via a Discord bot.
 
-## How does it work?
-The ESP32 is directly connected to the parlophone. It checks every 3s an API endpoint that returns 200 status code when the door should open.
+## Development Context
+Initially prototyped on Linux, finalized on macOS. Cross-platform compatibility is a key design consideration.
+
+## How It Works
+The ESP32 is directly connected to the parlophone. It checks an API endpoint every 3 seconds and opens the door when the endpoint returns a 200 status code.
+
+## Quick Start
+
+### Prerequisites
+- Python 3.7+
+- Node.js 14+
+- ESP32 Microcontroller (M5stampC3U)
+
+### Door Access
+Join the #door channel on discord.commonshub.brussels (membership required).
+- Use `/open` command
+- Type "open" in the channel
+
+## High-Level Architecture
+
+```mermaid
+graph TD
+    A[Discord Channel] -->|User Request| B[Web Server/Bot]
+    B -->|Authentication| C[ESP32 Microcontroller]
+    C -->|Door Control Signal| D[Door Mechanism]
+    D -->|Status Feedback| C
+    C -->|Connection Status| B
+    B -->|Logging| E[Access Log]
+```
 
 ## Installation
 
 ### Set up the ESP32
 
-Rename `credentials.example.py` to `credentials.py` and change the wifi settings (SSID and password).
+1. Rename `credentials.example.py` to `credentials.py`
+2. Update WiFi settings (SSID and password)
 
 Install dependencies:
-
-```
+```bash
 pip install esptool==4.8.1
 pip install adafruit-ampy
 ```
 
 Flash the ESP32:
-
-```
-python3 esp32/flash.py /dev/tty.usbmodem101
-```
-
-Replace `/dev/tty.usdmodem101` by the right port for your machine (`ls /dev/tty.*`).
-
-Then upload the scripts:
-
-```
-python esp32/install.py /dev/tty.usbmodem101
+```bash
+python3 esp32/flash.py /dev/tty.YOUR_PORT
 ```
 
-### Run the server and discord bot
+#### USB Port Detection
+- Linux: Use `ls /dev/ttyUSB*` or `ls /dev/ttyACM*`
+- macOS: Use `ls /dev/tty.usbmodem*` or `ls /dev/tty.usbserial*`
+- Windows: Check Device Manager for COM port
 
-Rename `.env.example` to `.env` and change the environment variables `DISCORD_BOT_TOKEN` (you can get one in the developer portal of discord), `DISCORD_CHANNEL_ID` and `SECRET`.
+Replace `/dev/tty.YOUR_PORT` with your specific USB port.
 
-Make sure you have `applications.commands` and `bot` in scopes and `Manage messages` and `Send messages` in permissions.
-
-Then run
-
+Upload scripts:
+```bash
+python esp32/install.py /dev/tty.YOUR_PORT
 ```
+
+### Run Server and Discord Bot
+
+1. Rename `.env.example` to `.env`
+2. Configure environment variables:
+   - `DISCORD_BOT_TOKEN` (from Discord Developer Portal)
+   - `DISCORD_CHANNEL_ID`
+   - `SECRET`
+
+3. Ensure Discord bot permissions:
+   - Scopes: `applications.commands`, `bot`
+   - Permissions: `Manage messages`, `Send messages`
+
+Install and start:
+```bash
 npm install
 npm start
 ```
 
-To open the door:
+## Usage Methods
 
-```
+### Discord Channel
+- Type `open`
+- Use `/open` command
+
+### API Endpoint
+```bash
 curl http://localhost:3000/open?secret=YOURSECRET
 ```
 
-Or from the discord channel (make sure the bot has been installed and its role has been added to the permission of the channel), type `open` or use the `/open` command.
+## Additional Endpoints
+- View openings log: `http://localhost:3000/log`
+- Check device status: `http://localhost:3000/status`
 
-To check the log of openings:
-
-```
-http://localhost:3000/log
-```
-
-You can also check the status of each device connected to the server via `/status`
-
-```
-http://localhost:3000/status
-```
+## Detailed Documentation
+Explore our comprehensive documentation in the [`docs/`](docs/) directory:
+- [System Architecture](docs/README.md)
+- [Hardware Setup](docs/hardware-setup.md)
+- [Software Installation](docs/software-installation.md)
+- [Security Considerations](docs/security.md)
 
 ## Contributors
-
 - Nicolas ([@nicolasdb](https://github.com/nicolasdb))
 - Xavier ([@xdamman](https://github.com/xdamman))
+
+## License
+Refer to the LICENSE file in the project root.
+
+## Platform Compatibility
+Developed and tested on Linux and macOS. Windows compatibility may require additional configuration.
